@@ -14,13 +14,13 @@ describe('HTMLEditor', () => {
 
   it('renders correctly with initial value', () => {
     render(<HTMLEditor {...defaultProps} />);
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByLabelText(/html input/i);
     expect(textarea).toHaveValue('<button>Click me</button>');
   });
 
   it('calls onChange when textarea value changes', () => {
     render(<HTMLEditor {...defaultProps} />);
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByLabelText(/html input/i);
     fireEvent.change(textarea, { target: { value: '<div>New content</div>' } });
     expect(defaultProps.onChange).toHaveBeenCalledWith('<div>New content</div>');
   });
@@ -59,7 +59,7 @@ describe('HTMLEditor', () => {
 
   it('displays character count', () => {
     render(<HTMLEditor {...defaultProps} value="<div>test</div>" />);
-    expect(screen.getByText(/16 characters/i)).toBeInTheDocument();
+    expect(screen.getByText(/15 characters/i)).toBeInTheDocument();
   });
 
   it('renders URL input section', () => {

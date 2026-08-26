@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AccessibilityFinding, AIExplanation } from '../types/accessibility';
-import { getAIExplanation } from '../lib/gemini-api';
+import { getAIExplanation } from '../lib/explain-client';
 
 interface FindingDetailPanelProps {
   finding: AccessibilityFinding;
@@ -12,18 +12,11 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
   const [aiError, setAiError] = useState<string | null>(null);
 
   const handleGetAIExplanation = async () => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      setAiError('API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
-      return;
-    }
-
     setIsLoadingAI(true);
     setAiError(null);
 
     try {
-      const result = await getAIExplanation(finding, apiKey);
+      const result = await getAIExplanation(finding);
       
       if (result.success && result.data) {
         setAiExplanation(result.data);
@@ -121,6 +114,13 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
             <p className="text-yellow-700 text-sm mt-2">
               You can still review the accessibility finding and WCAG guidance above.
             </p>
+            <button
+              onClick={handleGetAIExplanation}
+              disabled={isLoadingAI}
+              className="mt-3 px-3 py-1.5 bg-yellow-800 text-white text-sm rounded-lg font-medium hover:bg-yellow-900 focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Retry
+            </button>
           </div>
         )}
 
@@ -165,8 +165,8 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
           </div>
         )}
 
-        {/* Fallback help text when AI is not available */}
-        {!aiExplanation && !aiError && !isLoadingAI && (
+        {/* Deterministic axe guidance, always available when there is no AI explanation */}
+        {!aiExplanation && !isLoadingAI && (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Help</h4>
             <p className="text-gray-700 text-sm">{finding.help}</p>
