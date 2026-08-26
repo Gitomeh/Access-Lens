@@ -85,8 +85,10 @@ cp .env.example .env
 
 4. Add your Gemini API key to `.env`:
 ```
-VITE_GEMINI_API_KEY=your_actual_api_key_here
+GEMINI_API_KEY=your_actual_api_key_here
 ```
+
+The key is read only by the `/api/explain` serverless function (and the equivalent Vite dev middleware). It is never bundled into client code, so do not prefix it with `VITE_`.
 
 ### Getting a Gemini API Key
 
@@ -342,8 +344,10 @@ AccessLens is configured for deployment on Vercel.
 
 Configure the following environment variable in your deployment platform:
 ```
-VITE_GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
+
+Set it as a server-side environment variable (Vercel project settings). The browser calls `POST /api/explain`, which calls Gemini server-side.
 
 ### Deployment Steps
 

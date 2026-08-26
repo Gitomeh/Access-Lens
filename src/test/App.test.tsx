@@ -17,7 +17,7 @@ describe('App', () => {
 
   it('has default HTML content in the editor', () => {
     render(<App />);
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByLabelText(/html input/i);
     expect(textarea).toHaveValue();
   });
 
@@ -26,21 +26,18 @@ describe('App', () => {
     const clearButton = screen.getByRole('button', { name: /clear/i });
     fireEvent.click(clearButton);
     
-    const textarea = screen.getByRole('textbox');
-    expect(textarea).toHaveValue('<button>\n  <img src="logo.png">\n</button>');
+    const textarea = screen.getByLabelText(/html input/i);
+    expect(textarea).toHaveValue('');
   });
 
-  it('shows error when analyzing empty HTML', async () => {
+  it('prevents analyzing empty HTML', async () => {
     render(<App />);
-    
-    const textarea = screen.getByRole('textbox');
+
+    const textarea = screen.getByLabelText(/html input/i);
     fireEvent.change(textarea, { target: { value: '' } });
-    
-    const analyzeButton = screen.getByRole('button', { name: /analyze accessibility/i });
-    fireEvent.click(analyzeButton);
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /analyze accessibility/i })).toBeDisabled();
     });
   });
 });

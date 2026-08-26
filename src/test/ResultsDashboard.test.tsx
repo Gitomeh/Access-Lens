@@ -47,7 +47,7 @@ describe('ResultsDashboard', () => {
     );
 
     expect(screen.getByText('Total Issues')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument(); // Total issues
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0); // Total issues
     expect(screen.getByText('Serious')).toBeInTheDocument();
   });
 

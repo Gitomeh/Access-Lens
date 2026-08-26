@@ -19,7 +19,7 @@ This guide covers deploying AccessLens to production, specifically for Vercel.
   Verify the build completes without errors.
 
 - [ ] **Environment variables configured**
-  - `VITE_GEMINI_API_KEY` set in Vercel project settings
+  - `GEMINI_API_KEY` set in Vercel project settings
   - API key obtained from [Google AI Studio](https://makersuite.google.com/app/apikey)
   - `.env` file exists locally for development
 
@@ -109,7 +109,7 @@ This guide covers deploying AccessLens to production, specifically for Vercel.
 
 1. In Vercel project settings, go to "Environment Variables"
 2. Add the following variable:
-   - **Name**: `VITE_GEMINI_API_KEY`
+   - **Name**: `GEMINI_API_KEY`
    - **Value**: Your actual Gemini API key
 3. Click "Save"
 
@@ -134,7 +134,7 @@ This guide covers deploying AccessLens to production, specifically for Vercel.
 
 ### Required Variables
 
-- `VITE_GEMINI_API_KEY`: Google Gemini API key for AI explanations
+- `GEMINI_API_KEY`: Google Gemini API key for AI explanations
 
 ### Getting Your API Key
 
