@@ -2,7 +2,7 @@ import { buildPrompt } from './prompt';
 import type { ExplainErrorCode, ExplainRequestPayload, ExplainResult } from './types';
 import { parseExplanation, parseFindingPayload } from './validation';
 
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-3.6-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const DEFAULT_TIMEOUT_MS = 15_000;
 

@@ -83,23 +83,23 @@ function App() {
   ) || undefined;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col items-center justify-center">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-lg z-50"
       >
         Skip to main content
       </a>
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="bg-white border-b border-gray-200 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
           <h1 className="text-3xl font-bold text-gray-900">AccessLens</h1>
           <p className="text-gray-600 mt-1">See your website through every user's lens</p>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="main-content" tabIndex={-1}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col items-center" id="main-content" tabIndex={-1}>
         {!scanResult ? (
-          <div className="max-w-3xl">
+          <div className="max-w-3xl w-full flex justify-center">
             <HTMLEditor
               value={html}
               onChange={setHtml}
@@ -111,8 +111,8 @@ function App() {
             />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+            <div className="flex flex-col items-center">
               <button
                 onClick={() => setScanResult(null)}
                 className="mb-4 text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -125,7 +125,7 @@ function App() {
                 onSelectFinding={setSelectedFindingId}
               />
             </div>
-            <div className="lg:sticky lg:top-8 h-fit">
+            <div className="lg:sticky lg:top-8 h-fit flex justify-center">
               {selectedFinding && (
                 <FindingDetailPanel finding={selectedFinding} />
               )}
@@ -134,8 +134,8 @@ function App() {
         )}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <footer className="bg-white border-t border-gray-200 mt-12 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
           <p className="text-sm text-gray-600">
             AccessLens uses axe-core for accessibility detection and Google Gemini for AI-powered explanations.
           </p>

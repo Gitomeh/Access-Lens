@@ -19,7 +19,7 @@ Finding:
 - Affected HTML: ${finding.html || 'Not supplied'}
 - WCAG tags: ${finding.tags.length > 0 ? finding.tags.join(', ') : 'Not supplied'}
 
-Respond with valid JSON only, no prose and no markdown fences, using exactly these keys:
+Respond with valid JSON only. Do NOT use markdown fences (no \`\`\`json or \`\`\`). Do NOT include any prose. Use exactly these keys:
 {
   "summary": "1-2 sentences describing the finding",
   "whyItMatters": "practical impact of leaving it unfixed",
