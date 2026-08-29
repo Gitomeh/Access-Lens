@@ -59,7 +59,7 @@ describe('HTMLEditor', () => {
 
   it('displays character count', () => {
     render(<HTMLEditor {...defaultProps} value="<div>test</div>" />);
-    expect(screen.getByText(/15 characters/i)).toBeInTheDocument();
+    expect(screen.getByText(/15 \/ 500,000 characters/i)).toBeInTheDocument();
   });
 
   it('renders URL input section', () => {

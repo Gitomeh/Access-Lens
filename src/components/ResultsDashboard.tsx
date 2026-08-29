@@ -17,8 +17,9 @@ const severityColors: Record<Severity, string> = {
 };
 
 export function ResultsDashboard({ scanResult, selectedFindingId, onSelectFinding }: ResultsDashboardProps) {
-  const { violations, passes } = scanResult;
+  const { violations, passes, incomplete } = scanResult;
   const totalIssues = violations.length;
+  const needsReviewCount = incomplete.length;
   const severityCount = getSeverityCount(scanResult);
 
   const sortedViolations = [...violations].sort((a, b) => {
@@ -30,7 +31,7 @@ export function ResultsDashboard({ scanResult, selectedFindingId, onSelectFindin
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Accessibility Results</h2>
       
       {/* Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8" role="region" aria-label="Accessibility summary">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8" role="region" aria-label="Accessibility summary">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <p className="text-3xl font-bold text-gray-900" aria-label={`Total issues: ${totalIssues}`}>{totalIssues}</p>
           <p className="text-sm text-gray-600">Total Issues</p>
@@ -51,6 +52,17 @@ export function ResultsDashboard({ scanResult, selectedFindingId, onSelectFindin
           <p className="text-3xl font-bold text-blue-700" aria-label={`Minor issues: ${severityCount.minor}`}>{severityCount.minor}</p>
           <p className="text-sm text-blue-600">Minor</p>
         </div>
+        <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+          <p className="text-3xl font-bold text-purple-700" aria-label={`Needs review: ${needsReviewCount}`}>{needsReviewCount}</p>
+          <p className="text-sm text-purple-600">Needs Review</p>
+        </div>
+      </div>
+
+      {/* WCAG Disclaimer */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8" role="note">
+        <p className="text-sm text-gray-700">
+          <strong>Note:</strong> Automated testing can identify many accessibility issues, but it cannot determine complete WCAG conformance by itself. Manual testing is still required for comprehensive evaluation.
+        </p>
       </div>
 
       {/* Findings List */}
@@ -84,6 +96,15 @@ export function ResultsDashboard({ scanResult, selectedFindingId, onSelectFindin
                       </span>
                       <h4 className="mt-2 font-medium text-gray-900">{finding.ruleId}</h4>
                       <p className="text-sm text-gray-600 mt-1">{finding.description}</p>
+                      {finding.tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {finding.tags.slice(0, 3).map((tag) => (
+                            <span key={tag} className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <p className="text-xs text-gray-500 mt-2">
                         {finding.nodes.length} affected element{finding.nodes.length !== 1 ? 's' : ''}
                       </p>
@@ -95,6 +116,48 @@ export function ResultsDashboard({ scanResult, selectedFindingId, onSelectFindin
           </ul>
         )}
       </div>
+
+      {/* Needs Review / Manual Checks */}
+      {needsReviewCount > 0 && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Needs Manual Review ({needsReviewCount})
+          </h3>
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+            <p className="text-purple-800 text-sm">
+              These items require manual verification. Automated tools cannot determine if these are actual issues.
+            </p>
+          </div>
+          <ul className="space-y-3" role="list">
+            {incomplete.map((finding) => (
+              <li key={finding.id}>
+                <button
+                  onClick={() => onSelectFinding(finding.id)}
+                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                    selectedFindingId === finding.id
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                  aria-pressed={selectedFindingId === finding.id}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-800 border border-purple-200">
+                        NEEDS REVIEW
+                      </span>
+                      <h4 className="mt-2 font-medium text-gray-900">{finding.ruleId}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{finding.description}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {finding.nodes.length} element{finding.nodes.length !== 1 ? 's' : ''} to review
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Passed Checks */}
       {passes.length > 0 && (

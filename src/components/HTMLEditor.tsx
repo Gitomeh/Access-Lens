@@ -6,11 +6,14 @@ interface HTMLEditorProps {
   onAnalyze: () => void;
   onClear: () => void;
   isLoading: boolean;
+  loadingState?: 'idle' | 'validating' | 'fetching' | 'analyzing' | 'generating';
   error?: string;
   onFetchFromUrl?: (url: string) => Promise<void>;
 }
 
-export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, error, onFetchFromUrl }: HTMLEditorProps) {
+const MAX_HTML_SIZE = 500_000; // 500KB limit
+
+export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, loadingState = 'idle', error, onFetchFromUrl }: HTMLEditorProps) {
   const [characterCount, setCharacterCount] = useState(value.length);
   const [url, setUrl] = useState('');
   const [isFetching, setIsFetching] = useState(false);
@@ -18,6 +21,9 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, err
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
+    if (newValue.length > MAX_HTML_SIZE) {
+      return; // Prevent exceeding size limit
+    }
     setCharacterCount(newValue.length);
     onChange(newValue);
   };
@@ -35,6 +41,21 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, err
       setFetchError(err instanceof Error ? err.message : 'Failed to fetch HTML from URL');
     } finally {
       setIsFetching(false);
+    }
+  };
+
+  const getLoadingMessage = () => {
+    switch (loadingState) {
+      case 'validating':
+        return 'Validating...';
+      case 'fetching':
+        return 'Fetching...';
+      case 'analyzing':
+        return 'Analyzing...';
+      case 'generating':
+        return 'Generating...';
+      default:
+        return 'Analyzing...';
     }
   };
 
@@ -91,7 +112,7 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, err
           Enter HTML code to check for accessibility issues
         </p>
         <p id="html-input-charcount" className="text-sm text-gray-500" aria-live="polite">
-          {characterCount} characters
+          {characterCount.toLocaleString()} / {MAX_HTML_SIZE.toLocaleString()} characters
         </p>
       </div>
       {error && (
@@ -106,7 +127,7 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, err
           className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-busy={isLoading}
         >
-          {isLoading ? 'Analyzing...' : 'Analyze Accessibility'}
+          {isLoading ? getLoadingMessage() : 'Analyze Accessibility'}
         </button>
         <button
           onClick={onClear}
