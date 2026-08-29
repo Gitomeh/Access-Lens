@@ -35,7 +35,7 @@ function explainApiDevServer(env: Record<string, string>): Plugin {
         }
 
         process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY
-        await handler({ method: req.method, body: raw || undefined }, apiRes)
+        await handler({ method: req.method, body: raw || undefined, headers: req.headers }, apiRes)
       })
     },
   }
@@ -43,36 +43,35 @@ function explainApiDevServer(env: Record<string, string>): Plugin {
 
 function fetchApiDevServer(): Plugin {
   return {
-    name: 'accesslens-fetch-api',
-    apply: 'serve',
-    configureServer(server) {
-      server.middlewares.use('/api/fetch', async (req, res) => {
-        const { default: handler } = await server.ssrLoadModule('/api/fetch.ts')
-
-        const chunks: Buffer[] = []
-        for await (const chunk of req) chunks.push(chunk as Buffer)
-        const raw = Buffer.concat(chunks).toString('utf8')
-
-        const apiRes = {
-          status(code: number) {
-            res.statusCode = code
-            return apiRes
-          },
-          setHeader(name: string, value: string) {
-            res.setHeader(name, value)
-            return apiRes
-          },
-          json(body: unknown) {
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify(body))
-            return apiRes
-          },
-        }
-
-        await handler({ method: req.method, body: raw || undefined }, apiRes)
-      })
+    name: 'fetch-api-dev-server',
+    configureServer(server: any) {
+      server.middlewares.use('/api/fetch', async (req: any, res: any) => {
+        const fetchHandler = (await import('./api/fetch.ts')).default;
+        await fetchHandler(
+          { method: req.method, body: await getRequestBody(req), headers: req.headers },
+          {
+            status: (code: number) => {
+              res.statusCode = code;
+              return res;
+            },
+            json: (body: any) => {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(body));
+            },
+            setHeader: (name: string, value: string) => {
+              res.setHeader(name, value);
+            },
+          }
+        );
+      });
     },
   }
+}
+
+async function getRequestBody(req: any): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(chunk as Buffer);
+  return Buffer.concat(chunks).toString('utf8');
 }
 
 // https://vite.dev/config/

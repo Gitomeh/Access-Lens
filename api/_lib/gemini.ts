@@ -1,6 +1,6 @@
-import { buildPrompt } from './prompt';
-import type { ExplainErrorCode, ExplainRequestPayload, ExplainResult } from './types';
-import { parseExplanation, parseFindingPayload } from './validation';
+import { buildPrompt } from './prompt.js';
+import type { ExplainErrorCode, ExplainRequestPayload, ExplainResult } from './types.js';
+import { parseExplanation, parseFindingPayload } from './validation.js';
 
 const GEMINI_MODEL = 'gemini-1.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;

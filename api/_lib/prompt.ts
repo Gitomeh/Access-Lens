@@ -1,4 +1,4 @@
-import type { ExplainRequestPayload } from './types';
+import type { ExplainRequestPayload } from './types.js';
 
 export function buildPrompt(finding: ExplainRequestPayload): string {
   return `You are an accessibility engineer helping a developer remediate a single finding.

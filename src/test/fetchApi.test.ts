@@ -5,6 +5,12 @@ import handler from '../../api/fetch';
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
+// Mock rate limiting functions to bypass rate limit checks in tests
+vi.mock('../../api/_lib/rateLimit.js', () => ({
+  checkRateLimit: () => ({ allowed: true }),
+  getClientIp: () => '127.0.0.1',
+}));
+
 describe('Fetch API - SSRF Protection', () => {
   it('should reject localhost URLs', async () => {
     const req = { method: 'POST', body: JSON.stringify({ url: 'http://localhost:8080' }) };

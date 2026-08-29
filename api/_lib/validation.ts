@@ -1,4 +1,4 @@
-import type { AIExplanationPayload, ExplainRequestPayload } from './types';
+import type { AIExplanationPayload, ExplainRequestPayload } from './types.js';
 
 const MAX_FIELD_LENGTH = 4000;
 const MAX_TAGS = 30;

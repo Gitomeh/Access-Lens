@@ -1,10 +1,15 @@
+import { checkRateLimit, getClientIp } from './_lib/rateLimit.js';
+
 // Security constants
 const MAX_RESPONSE_SIZE = 2_000_000; // 2MB
 const REQUEST_TIMEOUT_MS = 15_000;
+const MAX_REQUEST_BODY_SIZE = 10_000; // 10KB for URL requests
+const MAX_URL_LENGTH = 2_000; // 2000 characters
 
 interface ApiRequest {
   method?: string;
   body?: unknown;
+  headers?: Record<string, string | undefined>;
 }
 
 interface ApiResponse {
@@ -196,6 +201,24 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
+
+  // Rate limiting
+  const clientIp = getClientIp(req);
+  const rateLimit = checkRateLimit(clientIp);
+  
+  if (!rateLimit.allowed) {
+    const retryAfter = rateLimit.retryAfter || 60;
+    res.setHeader('Retry-After', retryAfter.toString());
+    return res.status(429).json({ 
+      success: false, 
+      error: `Too many requests. Please try again in ${retryAfter} seconds.` 
+    });
+  }
+
+  // Check request body size
+  if (typeof req.body === 'string' && req.body.length > MAX_REQUEST_BODY_SIZE) {
+    return res.status(413).json({ success: false, error: 'Request body is too large' });
+  }
   
   let body: unknown;
   try {
@@ -212,6 +235,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   
   if (!url) {
     return res.status(400).json({ success: false, error: 'URL cannot be empty' });
+  }
+
+  if (url.length > MAX_URL_LENGTH) {
+    return res.status(400).json({ success: false, error: 'URL is too long' });
   }
   
   const result = await fetchHtml(url);
