@@ -60,6 +60,13 @@ function App() {
     setScanError(null);
   };
 
+  const handleHome = () => {
+    setShowLanding(true);
+    setScanResult(null);
+    setSelectedFindingId(null);
+    setScanError(null);
+  };
+
   const handleFetchFromUrl = async (url: string) => {
     setLoadingState('validating');
     try {
@@ -103,7 +110,7 @@ function App() {
       <header className="bg-white border-b border-gray-200 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
           <h1 className="text-3xl font-bold text-gray-900">AccessLens</h1>
-          <p className="text-gray-600 mt-1">See your website through every user's lens</p>
+          <p className="text-gray-600 mt-1 text-sm">See your website through every user's lens</p>
         </div>
       </header>
 
@@ -188,6 +195,7 @@ function App() {
               onChange={setHtml}
               onAnalyze={handleAnalyze}
               onClear={handleClear}
+              onHome={handleHome}
               isLoading={isScanning}
               loadingState={loadingState}
               error={scanError || undefined}

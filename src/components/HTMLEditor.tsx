@@ -5,6 +5,7 @@ interface HTMLEditorProps {
   onChange: (value: string) => void;
   onAnalyze: () => void;
   onClear: () => void;
+  onHome?: () => void;
   isLoading: boolean;
   loadingState?: 'idle' | 'validating' | 'fetching' | 'analyzing' | 'generating';
   error?: string;
@@ -13,7 +14,7 @@ interface HTMLEditorProps {
 
 const MAX_HTML_SIZE = 500_000; // 500KB limit
 
-export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, loadingState = 'idle', error, onFetchFromUrl }: HTMLEditorProps) {
+export function HTMLEditor({ value, onChange, onAnalyze, onClear, onHome, isLoading, loadingState = 'idle', error, onFetchFromUrl }: HTMLEditorProps) {
   const [characterCount, setCharacterCount] = useState(value.length);
   const [url, setUrl] = useState('');
   const [isFetching, setIsFetching] = useState(false);
@@ -136,6 +137,15 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, isLoading, loa
         >
           Clear
         </button>
+        {onHome && (
+          <button
+            onClick={onHome}
+            disabled={isLoading}
+            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Home
+          </button>
+        )}
       </div>
     </div>
   );
