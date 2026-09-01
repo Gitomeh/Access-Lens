@@ -25,6 +25,39 @@ function App() {
   const [loadingState, setLoadingState] = useState<'idle' | 'validating' | 'fetching' | 'analyzing' | 'generating'>('idle');
   const [showLanding, setShowLanding] = useState(true);
 
+  const exampleHtmls = [
+    {
+      title: "Missing Alt Text",
+      description: "Check for missing alt attributes on images",
+      html: `<div class="header">
+  <h1>Welcome</h1>
+  <img src="logo.png" />
+  <button onclick="submit()">Click here</button>
+</div>`,
+    },
+    {
+      title: "Form Without Labels",
+      description: "Check for missing form labels",
+      html: `<form>
+  <input type="text" placeholder="Name">
+  <input type="email" placeholder="Email">
+  <button>Submit</button>
+</form>`,
+    },
+    {
+      title: "Low Contrast Text",
+      description: "Check for insufficient color contrast",
+      html: `<div style="background-color: #gray; color: #lightgray;">
+  <p>This text has low contrast</p>
+</div>`,
+    },
+  ];
+
+  const handleExampleClick = (exampleHtml: string) => {
+    setHtml(exampleHtml);
+    setShowLanding(false);
+  };
+
   const handleAnalyze = async () => {
     if (!html.trim()) {
       setScanError('Please enter HTML code to analyze');
@@ -114,7 +147,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col items-center" id="main-content" tabIndex={-1}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col items-center" id="main-content">
         {showLanding && !scanResult ? (
           <div className="max-w-4xl w-full text-center">
             {/* Hero Section */}
@@ -144,6 +177,24 @@ function App() {
                 >
                   Fetch from URL
                 </button>
+              </div>
+            </div>
+
+            {/* Example HTMLs */}
+            <div className="mb-12">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Try with example HTML</h3>
+              <p className="text-gray-600 mb-6">Click an example to analyze common accessibility issues:</p>
+              <div className="grid md:grid-cols-3 gap-4">
+                {exampleHtmls.map((example, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleExampleClick(example.html)}
+                    className="text-left p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                  >
+                    <h4 className="font-medium text-gray-900 mb-1">{example.title}</h4>
+                    <p className="text-sm text-gray-600">{example.description}</p>
+                  </button>
+                ))}
               </div>
             </div>
 

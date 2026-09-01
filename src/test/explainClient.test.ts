@@ -48,13 +48,13 @@ describe('getAIExplanation', () => {
       vi.fn().mockResolvedValue({
         ok: false,
         status: 503,
-        json: async () => ({ success: false, code: 'missing_api_key', message: 'The AI service is not configured on the server.' }),
+        json: async () => ({ success: false, code: 'missing_api_key', message: 'The AI service is not configured. Please contact support.' }),
       })
     );
 
     const result = await getAIExplanation(finding);
 
-    expect(result).toEqual({ success: false, error: 'The AI service is not configured on the server.' });
+    expect(result).toEqual({ success: false, error: 'The AI service is not configured. Please contact support.' });
   });
 
   it('reports a network failure without leaking internals', async () => {
@@ -63,7 +63,7 @@ describe('getAIExplanation', () => {
     const result = await getAIExplanation(finding);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Could not reach the AI explanation service. Please try again.');
+    expect(result.error).toBe('Could not reach the AI explanation service. Please check your connection and try again.');
   });
 
   it('rejects an incomplete explanation payload', async () => {

@@ -10,8 +10,11 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
   const [aiExplanation, setAiExplanation] = useState<AIExplanation | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const handleGetAIExplanation = async () => {
+    if (isLoadingAI) return;
+    
     setIsLoadingAI(true);
     setAiError(null);
 
@@ -27,7 +30,15 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
       setAiError(error instanceof Error ? error.message : 'Failed to generate explanation');
     } finally {
       setIsLoadingAI(false);
+      setIsRetrying(false);
     }
+  };
+
+  const handleRetry = () => {
+    if (isRetrying || isLoadingAI) return;
+    setIsRetrying(true);
+    setAiError(null);
+    handleGetAIExplanation();
   };
 
   const handleCopyCode = () => {
@@ -58,7 +69,7 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
           className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-busy={isLoadingAI}
         >
-          {isLoadingAI ? 'Generating...' : aiExplanation ? 'Explained' : 'Get AI Explanation'}
+          {isRetrying ? 'Retrying...' : isLoadingAI ? 'Generating...' : aiExplanation ? 'Explained' : 'Get AI Explanation'}
         </button>
       </div>
 
@@ -106,21 +117,60 @@ export function FindingDetailPanel({ finding }: FindingDetailPanelProps) {
           </a>
         </div>
 
+        {/* AI Explanation Loading State */}
+        {isLoadingAI && !aiExplanation && (
+          <div className="pt-4 border-t border-gray-200" aria-live="polite" aria-busy="true">
+            <div className="space-y-4">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3 mb-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              </div>
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-full mb-1"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">Generating AI explanation...</p>
+          </div>
+        )}
+
         {/* AI Explanation */}
         {aiError && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4" role="alert">
-            <p className="text-yellow-800 text-sm font-medium">AI Explanation Unavailable</p>
-            <p className="text-yellow-700 text-sm mt-1">{aiError}</p>
-            <p className="text-yellow-700 text-sm mt-2">
-              You can still review the accessibility finding and WCAG guidance above.
-            </p>
-            <button
-              onClick={handleGetAIExplanation}
-              disabled={isLoadingAI}
-              className="mt-3 px-3 py-1.5 bg-yellow-800 text-white text-sm rounded-lg font-medium hover:bg-yellow-900 focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Retry
-            </button>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4" role="alert">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-amber-900 text-sm font-medium">Couldn't finish that explanation</p>
+                <p className="text-amber-800 text-sm mt-1">{aiError}</p>
+                <p className="text-amber-700 text-sm mt-2">
+                  You can still review the accessibility finding and WCAG guidance above.
+                </p>
+                <button
+                  onClick={handleRetry}
+                  disabled={isLoadingAI || isRetrying}
+                  className="mt-3 px-3 py-1.5 bg-amber-700 text-white text-sm rounded-lg font-medium hover:bg-amber-800 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-busy={isLoadingAI || isRetrying}
+                >
+                  {isRetrying ? 'Retrying...' : 'Retry explanation'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

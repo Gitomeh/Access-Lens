@@ -48,13 +48,13 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, onHome, isLoad
   const getLoadingMessage = () => {
     switch (loadingState) {
       case 'validating':
-        return 'Validating...';
+        return 'Validating URL...';
       case 'fetching':
-        return 'Fetching...';
+        return 'Fetching HTML...';
       case 'analyzing':
-        return 'Analyzing...';
+        return 'Analyzing accessibility...';
       case 'generating':
-        return 'Generating...';
+        return 'Generating results...';
       default:
         return 'Analyzing...';
     }
@@ -76,6 +76,7 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, onHome, isLoad
             placeholder="https://example.com"
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             disabled={isFetching || isLoading}
+            inputMode="url"
           />
           <button
             onClick={handleFetchFromUrl}
@@ -87,9 +88,14 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, onHome, isLoad
           </button>
         </div>
         {fetchError && (
-          <p className="mt-2 text-sm text-red-600" role="alert">
-            {fetchError}
-          </p>
+          <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3" role="alert">
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p className="text-sm text-amber-800">{fetchError}</p>
+            </div>
+          </div>
         )}
         <p className="mt-2 text-xs text-gray-500">
           Note: Some websites may block fetching due to CORS policies.
@@ -100,14 +106,29 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, onHome, isLoad
       <label htmlFor="html-input" className="block text-sm font-medium text-gray-700 mb-2">
         HTML Input
       </label>
-      <textarea
-        id="html-input"
-        value={value}
-        onChange={handleChange}
-        placeholder="Paste your HTML code here to analyze accessibility..."
-        className="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-        aria-describedby="html-input-help html-input-error html-input-charcount"
-      />
+      {isLoading && loadingState === 'analyzing' ? (
+        <div className="w-full h-64 p-4 border border-gray-300 rounded-lg bg-gray-50" aria-live="polite" aria-busy="true">
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+          </div>
+          <p className="text-sm text-gray-500 mt-4">{getLoadingMessage()}</p>
+        </div>
+      ) : (
+        <textarea
+          id="html-input"
+          value={value}
+          onChange={handleChange}
+          placeholder="Paste your HTML code here to analyze accessibility..."
+          className="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+          aria-describedby="html-input-help html-input-error html-input-charcount"
+          spellCheck={false}
+        />
+      )}
       <div className="flex justify-between items-center mt-2">
         <p id="html-input-help" className="text-sm text-gray-500">
           Enter HTML code to check for accessibility issues
@@ -117,9 +138,14 @@ export function HTMLEditor({ value, onChange, onAnalyze, onClear, onHome, isLoad
         </p>
       </div>
       {error && (
-        <p id="html-input-error" className="mt-2 text-sm text-red-600" role="alert">
-          {error}
-        </p>
+        <div id="html-input-error" className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3" role="alert">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="text-sm text-amber-800">{error}</p>
+          </div>
+        </div>
       )}
       <div className="flex gap-3 mt-4">
         <button

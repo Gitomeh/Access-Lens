@@ -39,6 +39,56 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(result.status).json(toResponseBody(result));
   }
 
+  // Development-only sabotage testing via query parameter
+  // ONLY active in development mode with ?sabotage=X
+  const isDev = process.env.NODE_ENV === 'development';
+  const sabotage = isDev && req.headers?.['x-sabotage'];
+  
+  if (sabotage) {
+    console.warn('[explain] Sabotage mode active:', sabotage);
+    
+    if (sabotage === 'error') {
+      // Test A: request failure before streaming
+      return res.status(500).json({ 
+        success: false, 
+        code: 'sabotage_error',
+        message: 'Simulated error before request' 
+      });
+    }
+    
+    if (sabotage === '429') {
+      // Test C: rate limit
+      const retryAfter = 60;
+      res.setHeader('Retry-After', retryAfter.toString());
+      return res.status(429).json({ 
+        success: false, 
+        code: 'rate_limited',
+        message: `Too many requests. Please try again in ${retryAfter} seconds.` 
+      });
+    }
+    
+    if (sabotage === 'malformed') {
+      // Test D: malformed response
+      return res.status(200).json({ 
+        success: true, 
+        data: { invalid: 'response', missing: 'fields' } 
+      });
+    }
+    
+    if (sabotage === 'midstream') {
+      // Test B: mid-stream failure (simulated with timeout)
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(res.status(500).json({ 
+            success: false, 
+            code: 'sabotage_midstream',
+            message: 'Simulated mid-stream failure' 
+          }));
+        }, 1000);
+      });
+    }
+  }
+
   // Rate limiting
   const clientIp = getClientIp(req);
   const rateLimit = checkRateLimit(clientIp);

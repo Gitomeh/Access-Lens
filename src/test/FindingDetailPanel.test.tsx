@@ -95,16 +95,16 @@ describe('FindingDetailPanel AI explanation', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
-        errorResponse(503, { success: false, code: 'missing_api_key', message: 'The AI service is not configured on the server.' })
+        errorResponse(503, { success: false, code: 'missing_api_key', message: 'The AI service is not configured. Please contact support.' })
       )
     );
 
     render(<FindingDetailPanel finding={mockFinding} />);
     await user.click(screen.getByRole('button', { name: /get ai explanation/i }));
 
-    expect(await screen.findByText('AI Explanation Unavailable')).toBeInTheDocument();
-    expect(screen.getByText('The AI service is not configured on the server.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+    expect(await screen.findByText(/couldn't finish that explanation/i)).toBeInTheDocument();
+    expect(screen.getByText('The AI service is not configured. Please contact support.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retry explanation/i })).toBeInTheDocument();
 
     // The deterministic axe finding is still fully available.
     expect(screen.getByText('color-contrast')).toBeInTheDocument();

@@ -68,14 +68,16 @@ describe('HTMLEditor', () => {
     expect(screen.getByPlaceholderText(/https:\/\/example.com/i)).toBeInTheDocument();
   });
 
-  it('calls onFetchFromUrl when fetch button is clicked', () => {
+  it('calls onFetchFromUrl when fetch button is clicked', async () => {
+    const user = userEvent.setup();
     const mockFetch = vi.fn();
     render(<HTMLEditor {...defaultProps} onFetchFromUrl={mockFetch} />);
     const urlInput = screen.getByPlaceholderText(/https:\/\/example.com/i);
     const fetchButton = screen.getByRole('button', { name: /fetch/i });
     
-    fireEvent.change(urlInput, { target: { value: 'https://example.com' } });
-    fireEvent.click(fetchButton);
+    await user.clear(urlInput);
+    await user.type(urlInput, 'https://example.com');
+    await user.click(fetchButton);
     
     expect(mockFetch).toHaveBeenCalledWith('https://example.com');
   });

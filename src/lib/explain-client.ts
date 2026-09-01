@@ -23,10 +23,21 @@ export async function getAIExplanation(finding: AccessibilityFinding): Promise<A
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
 
+  // Support for development sabotage testing
+  // Set window.__sabotage = 'error' | '429' | 'malformed' | 'midstream' in dev console
+  const isDev = import.meta.env.DEV;
+  const sabotage = isDev ? (window as any).__sabotage : null;
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (sabotage) {
+    headers['x-sabotage'] = sabotage;
+    console.warn('[explain-client] Sabotage mode active:', sabotage);
+  }
+
   try {
     const response = await fetch(EXPLAIN_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(toExplainPayload(finding)),
       signal: controller.signal,
     });
@@ -34,6 +45,16 @@ export async function getAIExplanation(finding: AccessibilityFinding): Promise<A
     const body = await response.json().catch(() => null);
 
     if (!response.ok) {
+      // Handle specific error codes
+      if (response.status === 429) {
+        return { success: false, error: 'The AI service is temporarily busy. Please try again in a moment.' };
+      }
+      if (response.status === 503) {
+        return { success: false, error: 'The AI service is not configured. Please contact support.' };
+      }
+      if (response.status === 504) {
+        return { success: false, error: 'The AI service took too long to respond. Please try again.' };
+      }
       return { success: false, error: readMessage(body) };
     }
 
@@ -46,6 +67,9 @@ export async function getAIExplanation(finding: AccessibilityFinding): Promise<A
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       return { success: false, error: 'The AI explanation timed out. Please try again.' };
+    }
+    if (error instanceof Error && error.message.includes('Failed to fetch')) {
+      return { success: false, error: 'Could not reach the AI explanation service. Please check your connection and try again.' };
     }
     return { success: false, error: 'Could not reach the AI explanation service. Please try again.' };
   } finally {
