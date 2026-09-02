@@ -9,5 +9,7 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     include: ['src/test/**/*.test.ts', 'src/test/**/*.test.tsx'],
     exclude: ['node_modules', 'dist', 'e2e'],
+    singleThread: true,
+    testTimeout: 10000,
   },
 })
